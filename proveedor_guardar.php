@@ -1,34 +1,65 @@
 <?php
-include 'inc/conexion.php';
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nombre_del_proveedor_post = strtoupper($_POST['nombre_del_proveedor']);
-    $direccion_del_proveedor_post = strtoupper($_POST['direccion_del_proveedor']);
-    $telefono_1_post = strtoupper($_POST['telefono_1']);
-    $telefono_2_post = strtoupper($_POST['telefono_2']);
-    $correo_proveedor_post = strtoupper($_POST['correo_proveedor']);
-    $id_proveedor='';
-    $ins=$con->prepare("INSERT INTO proveedor VALUES(?,?,?,?,?,?)");
-    $ins->bind_param("isssss",$id,$nombre_del_proveedor_post,$direccion_del_proveedor_post,$telefono_1_post,$telefono_2_post,$correo_proveedor_post);
-    if($ins->execute()){
-        header("Location: alerta.php?tipo=exito&operacion=Proveedor Guardado&destino=proveedor_registrar.php");
+$mysqli = new mysqli("localhost", "root", "", "tallerbd");
+$mysqli2 = new mysqli("localhost", "root", "", "tallerbd");
+session_start();
+$mensaje = "Sin mensajes";
+if (!isset($_SESSION['nombre_cliente']) && !isset($_SESSION['descripcion_coche']) && !isset($_SESSION['fecha_actual'])) {
+    header('Location: cotizacion_inicia.php');
+    //echo 'No se ha iniciado sesion';
+} else {
+    include 'inc/conexion.php';
+    //$db_table_name = "marca";
+
+
+    if (!$mysqli->query("CALL guardar_co('" . $_SESSION['nombre_cliente'] . "','" . $_SESSION['descripcion_coche'] . "','" . $_SESSION['fecha_actual'] . "')")) {
+        echo "Falló la llamada procedimiento principal: (" . $mysqli->errno . ") " . $mysqli->error;
+    } else {
+        $mensaje = "La cotizacion se guardó correctamente";
+        session_destroy();
+        if (!$mysqli2->query("CALL eliminar_temporal()")) {
+            echo "Falló la llamada eliminar temporal: (" . $mysqli2->errno . ") " . $mysqli2->error;
+        } else {
+            
+        }
     }
-    else{
-        header("Location: alerta.php?tipo=fracaso&operacion=Proveedor No Guardado&destino=proveedor_registrar.php");
-    }
-    $ins->close();
-    $con->close();
-    /*$nombre_del_proveedor_post = strtoupper($_POST['nombre_del_proveedor']);
-    $direccion_del_proveedor_post = strtoupper($_POST['direccion_del_proveedor']);
-    $telefono_1_post = strtoupper($_POST['telefono_1']);
-    $telefono_2_post = strtoupper($_POST['telefono_2']);
-    $correo_proveedor_post = strtoupper($_POST['correo_proveedor']);
-    
-    $ins=$con->query("INSERT INTO proveedor VALUES(NULL,'$nombre_del_proveedor_post','$direccion_del_proveedor_post','$telefono_1_post','$telefono_2_post','$correo_proveedor_post')");
-    if($ins){
-        echo "Proveedor Registrado";
-    }
-    else{
-        echo "NO SE HA EFECTUADO EL REGISTRO";
-    }
-    $con->close();*/
 }
+?>
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<!– PARA EJEMPLO DASC — >
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!--código que incluye Bootstrap-->
+        <?php include'inc/incluye_bootstrap.php' ?>
+        <!--termina código que incluye Bootstrap-->
+
+        <!-- PARA DATATABLE -->
+        <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+
+    </head>
+    <body>
+        <!--código que incluye el menú responsivo-->
+        <?php include'inc/incluye_menu.php' ?>
+        <!--termina código que incluye el menú responsivo-->
+        <div class="container">
+            <div class="jumbotron">
+                <h3>
+                    <?php echo $mensaje ?>"
+                </h3>
+                <p>
+                    <a href="cotizacion_inicia.php" class="btn btn-primary" role="button">ACEPTAR</a>
+                </p>
+
+            </div>
+        </div>
+
+    </body>
+</html>
