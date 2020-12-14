@@ -1,4 +1,5 @@
 <?php
+include 'inc/conexion.php';
 session_start();
 $nombre_cliente;
 if (!isset($_SESSION['nombre_cliente']) && !isset($_SESSION['descripcion_coche']) && !isset($_SESSION['fecha_actual'])) {
